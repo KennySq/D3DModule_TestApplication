@@ -11,12 +11,14 @@ bool Engine::OnInit()
 	SwapChainTexture = Renderer->GetSwapChainBuffer(0);
 	Renderer->AddRenderViewport(1.0f, 1.0f, BIWidth, BIHeight, 1.0f);
 	
-	static shared_ptr<D3DRS::D3DRenderableTexture> SwapChainTexture = Renderer->GetSwapChainBuffer();
+	static shared_ptr<D3DRS::D3DRenderableTexture> SwapChainTexture;
+	Renderer->GetSwapChainBuffer(0, SwapChainTexture);
 	static ComPtr<ID3D11RenderTargetView> SwapChainRTV = SwapChainTexture->GetResource();
-	//static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture = Renderer->GetSwapChainDepthStencil();
+	static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture;
+	Renderer->GetSwapChainDepthBuffer();
 
 	Context->RSSetViewports(0, &Renderer->GetViewport(0));
-	//Context->OMSetRenderTargets(1, SwapChainRTV.GetAddressOf(), DepthStencilTexture->GetResource().Get());
+	Context->OMSetRenderTargets(1, SwapChainRTV.GetAddressOf(), DepthStencilTexture->GetResource().Get());
 	return true;
 }
 
