@@ -7,7 +7,7 @@ bool Engine::OnInit()
 {
 	FBXLoader Loader;
 	Camera = make_shared<D3DACamera>(D3DACamera());
-	shared_ptr<D3DAModel<D3DVERTEX::StandardVertex>> SampleModel = Loader.Load("Resources/Stylized_box.FBX");
+	shared_ptr<D3DAModel> SampleModel = Loader.Load("Resources/Stylized_box.FBX");
 		
 	Renderer->GetSwapChainBuffer(0, SwapChainTexture);
 	Renderer->AddRenderViewport(1.0f, 1.0f, BIWidth, BIHeight, 1.0f);
