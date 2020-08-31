@@ -14,6 +14,8 @@ private:
 	static shared_ptr<Engine> EngineInstance;
 	shared_ptr<D3DARS::D3DACamera> Camera;
 	
+	shared_ptr<Scene> SelectedScene;
+	
 	Engine()
 	{
 		HWDevice = D3DHWDevice::GetHWDevice();

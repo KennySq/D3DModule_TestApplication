@@ -21,9 +21,19 @@ bool Engine::OnInit()
 	Renderer->SetSwapChainTexture(SwapChainTexture);
 	Renderer->SetSwapChainDepthStencil(DepthStencilTexture);
 
-
+	
+	// 보류 코드 //
 	Context->RSSetViewports(0, &Renderer->GetViewport(0));
 	Context->OMSetRenderTargets(1, SwapChainRTV.GetAddressOf(), *DepthStencilTexture->GetResource());
+	// ******** //
+
+
+	SelectedScene = make_shared<Scene>();
+
+	auto TemporalInst = make_shared<Instance>();
+	TemporalInst->SetMesh(SampleModel);
+	SelectedScene->AddInstance(TemporalInst);
+	
 	return true;
 }
 
