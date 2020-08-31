@@ -8,7 +8,7 @@ bool Engine::OnInit()
 	FBXLoader Loader;
 	Camera = make_shared<D3DACamera>(D3DACamera());
 	shared_ptr<D3DAModel> SampleModel = Loader.Load("Resources/Stylized_box.FBX");
-	shared_ptr<D3DAMaterial> Material;
+	shared_ptr<D3DAMaterial> Material = make_shared<D3DAMaterial>(D3DAMaterial());
 	CompilePass("SampleVS.hlsl", "Sample", PASSTYPE::VER | PASSTYPE::PIX, Material);
 
 	Renderer->GetSwapChainBuffer(0, SwapChainTexture);
