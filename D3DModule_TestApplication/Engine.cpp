@@ -8,7 +8,9 @@ bool Engine::OnInit()
 	FBXLoader Loader;
 	Camera = make_shared<D3DACamera>(D3DACamera());
 	shared_ptr<D3DAModel> SampleModel = Loader.Load("Resources/Stylized_box.FBX");
-		
+	shared_ptr<D3DAMaterial> Material;
+	CompilePass("SampleVS.hlsl", "Sample", PASSTYPE::VER | PASSTYPE::PIX, Material);
+
 	Renderer->GetSwapChainBuffer(0, SwapChainTexture);
 	Renderer->AddRenderViewport(1.0f, 1.0f, BIWidth, BIHeight, 1.0f);
 
@@ -33,7 +35,7 @@ bool Engine::OnInit()
 	auto TemporalInst = make_shared<Instance>();
 	TemporalInst->SetMesh(SampleModel);
 	SelectedScene->AddInstance(TemporalInst);
-	
+	SelectedScene->AddMaterial(Material);
 	return true;
 }
 
