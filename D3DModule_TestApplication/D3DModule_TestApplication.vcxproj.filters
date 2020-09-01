@@ -62,8 +62,8 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="SampleVS.hlsl">
+    <None Include="SampleVS.hlsl">
       <Filter>Shaders</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

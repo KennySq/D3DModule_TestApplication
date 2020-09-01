@@ -1,6 +1,10 @@
-cbuffer ConstantMatrices : register(b0)
+cbuffer Trnasform : register(b0)
 {
     matrix World;
+}
+
+cbuffer ConstantMatrices : register(b1)
+{
     matrix View;
     matrix Projection;
 }
