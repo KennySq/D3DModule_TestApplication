@@ -5,6 +5,14 @@ shared_ptr<Engine> Engine::EngineInstance = nullptr;
 
 bool Engine::OnInit()
 {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	auto IO = ImGui::GetIO();
+	ImGui_ImplWin32_Init(BIAppWindowHandle);
+
+	ImGui_ImplDX11_Init(Device.Get(), Context.Get());
+	ImGui::StyleColorsDark();
+
 	FBXLoader Loader;
 	Camera = make_shared<D3DACamera>(D3DACamera());
 	shared_ptr<D3DAModel> SampleModel = Loader.Load("Resources/Stylized_box.FBX");
@@ -22,13 +30,14 @@ bool Engine::OnInit()
 
 	Renderer->SetSwapChainTexture(SwapChainTexture);
 	Renderer->SetSwapChainDepthStencil(DepthStencilTexture);
-
+	Renderer->CreateRasterizerState(D3D11_CULL_NONE, D3D11_FILL_SOLID, false);
 	
 	// 보류 코드 //
 	Context->RSSetViewports(0, &Renderer->GetViewport(0));
 	Context->OMSetRenderTargets(1, SwapChainRTV.GetAddressOf(), *DepthStencilTexture->GetResource());
 	// ******** //
 
+	
 
 	SelectedScene = make_shared<Scene>();
 
@@ -45,6 +54,25 @@ bool Engine::OnInit()
 
 void Engine::OnUpdate(float Delta)
 {	
+	{
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+
+		
+		ImGui::NewFrame();
+		ImGui::Begin("Test");
+		ImGui::Text("Sample");
+		ImGui::End();
+		ImGui::EndFrame();
+
+		{
+			ImGui::Render();
+			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+		}
+		
+	}
+	
 	static ComPtr<ID3D11RenderTargetView> SwapChainRTV = *SwapChainTexture->GetResource();
 	static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture = Renderer->GetSwapChainDepthStencil();
 
@@ -59,17 +87,25 @@ void Engine::OnUpdate(float Delta)
 	Renderer->ClearDepthStencil(DepthStencilTexture);
 
 	static auto Inst = SelectedScene->GetInstance(0);
-	//Renderer->SelectRenderTarget(SwapChainRTV.GetAddressOf(), 1, )
-	Inst->DrawMesh();
+	Inst->SelectRenderTarget(SwapChainRTV.GetAddressOf(), 1, *DepthStencilTexture->GetResource());
+	Inst->SelectViewport(Renderer->GetViewport(0));
+	Inst->SetRasterizerState(Renderer.get(), 0);
 
-
+	Inst->DrawMesh(Renderer.get());
 }
 
 void Engine::OnRender(float Delta)
 {
+
 	Renderer->Execute();
 	SwapChain->Present(0, 0);
+
+
 }
 
 void Engine::OnRelease()
-{}
+{
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+}

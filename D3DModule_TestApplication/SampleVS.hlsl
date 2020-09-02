@@ -27,7 +27,7 @@ VSOutput SampleVS(VSInput Input)
     VSOutput Output = (VSOutput) 0;
     float4 WorldPosition;
     float4 WorldNormal = float4(Input.Normal, 1.0f);
-
+    Input.Position.w = 1.0f;
     WorldPosition = mul(Input.Position, World);
     
     Output.Position = mul(WorldPosition, View);
