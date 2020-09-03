@@ -9,8 +9,8 @@ bool Engine::OnInit()
 	ImGui::CreateContext();
 	auto IO = ImGui::GetIO();
 	ImGui_ImplWin32_Init(BIAppWindowHandle);
-
-	ImGui_ImplDX11_Init(Device.Get(), Context.Get());
+	static auto GUIContext = D3DHWDevice::GetDeferredContexts()[D3DHWDevice::GetCurrentContext()];
+	auto ImGuiResult = ImGui_ImplDX11_Init(Device.Get(), GUIContext);
 	ImGui::StyleColorsDark();
 
 	FBXLoader Loader;
@@ -35,6 +35,7 @@ bool Engine::OnInit()
 	// 보류 코드 //
 	Context->RSSetViewports(0, &Renderer->GetViewport(0));
 	Context->OMSetRenderTargets(1, SwapChainRTV.GetAddressOf(), *DepthStencilTexture->GetResource());
+	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// ******** //
 
 	
@@ -48,7 +49,8 @@ bool Engine::OnInit()
 	auto Inst = SelectedScene->MakeInstance("Sample Instance");
 	Inst->SetMesh(SampleModel);
 	Inst->AddMaterial(Material);
-	
+	Inst->GetTransform()->Rotate(-90, 0, 0);
+	Inst->GetTransform()->Translate(0, -25.0f, 0);
 	return true;
 }
 
@@ -66,9 +68,12 @@ void Engine::OnUpdate(float Delta)
 		ImGui::EndFrame();
 
 		{
+			
 			ImGui::Render();
-			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
+			auto DrawData = ImGui::GetDrawData();
+			ImGui_ImplDX11_RenderDrawData(DrawData);
+			//static auto GUIContext = D3DHWDevice::GetDeferredContexts()[0];
+			//Renderer->FlushCommand(GUIContext);
 		}
 		
 	}
@@ -92,6 +97,7 @@ void Engine::OnUpdate(float Delta)
 	Inst->SetRasterizerState(Renderer.get(), 0);
 
 	Inst->DrawMesh(Renderer.get());
+	
 }
 
 void Engine::OnRender(float Delta)
