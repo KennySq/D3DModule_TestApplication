@@ -5,12 +5,15 @@ shared_ptr<Engine> Engine::EngineInstance = nullptr;
 
 bool Engine::OnInit()
 {
+
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	auto IO = ImGui::GetIO();
-	ImGui_ImplWin32_Init(BIAppWindowHandle);
-	static auto GUIContext = D3DHWDevice::GetDeferredContexts()[D3DHWDevice::GetCurrentContext()];
-	auto ImGuiResult = ImGui_ImplDX11_Init(Device.Get(), GUIContext);
+	ImGui::SetCurrentContext(ImGui::CreateContext());
+	ImGuiIO& IO = ImGui::GetIO(); (void)IO;
+	
+	
+	ImGui_ImplWin32_Init((void*)BIAppWindowHandle);
+	auto ImGuiResult = ImGui_ImplDX11_Init(Device.Get(), GetContext());
+
 	ImGui::StyleColorsDark();
 
 	FBXLoader Loader;
@@ -22,10 +25,11 @@ bool Engine::OnInit()
 	Renderer->GetSwapChainBuffer(0, SwapChainTexture);
 	Renderer->AddRenderViewport(1.0f, 1.0f, BIWidth, BIHeight, 1.0f);
 
-	
-	
+
 	static ComPtr<ID3D11RenderTargetView> SwapChainRTV = *SwapChainTexture->GetResource();
 	static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture;
+
+	
 	Renderer->GetSwapChainDepthBuffer(DepthStencilTexture);
 
 	Renderer->SetSwapChainTexture(SwapChainTexture);
@@ -56,31 +60,12 @@ bool Engine::OnInit()
 
 void Engine::OnUpdate(float Delta)
 {	
-	{
-		ImGui_ImplDX11_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-
-		
-		ImGui::NewFrame();
-		ImGui::Begin("Test");
-		ImGui::Text("Sample");
-		ImGui::End();
-		ImGui::EndFrame();
-
-		{
-			
-			ImGui::Render();
-			auto DrawData = ImGui::GetDrawData();
-			ImGui_ImplDX11_RenderDrawData(DrawData);
-			//static auto GUIContext = D3DHWDevice::GetDeferredContexts()[0];
-			//Renderer->FlushCommand(GUIContext);
-		}
-		
-	}
-	
 	static ComPtr<ID3D11RenderTargetView> SwapChainRTV = *SwapChainTexture->GetResource();
 	static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture = Renderer->GetSwapChainDepthStencil();
 
+
+	
+	
 	static D3DViewProject ViewProject;
 
 	XMStoreFloat4x4(&ViewProject.View, Camera->GetView());
@@ -104,7 +89,28 @@ void Engine::OnRender(float Delta)
 {
 
 	Renderer->Execute();
-	SwapChain->Present(0, 0);
+
+	Context->RSSetViewports(1, &Renderer->GetViewport(0));
+	Context->OMSetRenderTargets(1, SwapChainTexture->GetResource(), nullptr);
+	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+
+	ImGui::SetWindowSize(ImVec2(200, 200));
+
+	ImGui::Begin("Test");
+	ImGui::Text("Sample");
+	ImGui::ShowDemoWindow();
+	ImGui::End();
+	ImGui::Render();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	ImGui::SetNextWindowSize(ImVec2(200, 200));
+
+	SwapChain->Present(1, 0);
 
 
 }

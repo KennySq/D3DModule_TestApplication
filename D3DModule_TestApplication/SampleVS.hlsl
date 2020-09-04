@@ -45,7 +45,7 @@ VSOutput SampleVS(VSInput Input)
 
 float4 SamplePS(VSOutput Output) : SV_Target0
 {
-    float4 Position = Output.Position;
+    float4 Position = float4(Output.Normal, 1.0f);
     
 	return Position;
 }
