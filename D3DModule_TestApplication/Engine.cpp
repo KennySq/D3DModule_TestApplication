@@ -48,13 +48,18 @@ bool Engine::OnInit()
 	auto Inst = SelectedScene->MakeInstance("Sample Instance");
 	Inst->SetMesh(SampleModel);
 	Inst->AddMaterial(Material);
+
+	ShaderEditor = make_shared<GUIShaderEditor>();
+	ShaderEditor->Open("SampleVS.hlsl");
 	
+
 	return true;
 }
 
 void Engine::OnUpdate(float Delta)
 {	
 	{
+		
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 
@@ -63,11 +68,15 @@ void Engine::OnUpdate(float Delta)
 		ImGui::Begin("Test");
 		ImGui::Text("Sample");
 		ImGui::End();
+
+		ShaderEditor->Editor();
+		
 		ImGui::EndFrame();
 
+		
+		
 		{
 			ImGui::Render();
-			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 		}
 		
@@ -91,6 +100,8 @@ void Engine::OnUpdate(float Delta)
 	Inst->SelectViewport(Renderer->GetViewport(0));
 	Inst->SetRasterizerState(Renderer.get(), 0);
 
+	Inst->GetTransform()->Rotate(90, 0, 0);
+	
 	Inst->DrawMesh(Renderer.get());
 }
 
@@ -98,6 +109,8 @@ void Engine::OnRender(float Delta)
 {
 
 	Renderer->Execute();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 	SwapChain->Present(0, 0);
 
 

@@ -11,15 +11,15 @@ cbuffer ConstantMatrices : register(b1)
 
 struct VSInput
 {
-	float4 Position : POSITION0;
-	float3 Normal : NORMAL0;
-	float2 UV : TEXCOORD0;
+    float4 Position : POSITION0;
+    float3 Normal : NORMAL0;
+    float2 UV : TEXCOORD0;
 };
 struct VSOutput
 {
-	float4 Position : SV_POSITION0;
-	float3 Normal : TEXCOORD0;
-	float2 UV : TEXCOORD1;
+    float4 Position : SV_POSITION0;
+    float3 Normal : TEXCOORD0;
+    float2 UV : TEXCOORD1;
 };
 
 VSOutput SampleVS(VSInput Input)
@@ -45,7 +45,7 @@ VSOutput SampleVS(VSInput Input)
 
 float4 SamplePS(VSOutput Output) : SV_Target0
 {
-    float4 Position = Output.Position;
+    float4 Position = float4(Output.Normal, 1.0f);
     
-	return Position;
+    return Position;
 }

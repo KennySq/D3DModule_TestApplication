@@ -15,6 +15,8 @@ private:
 	shared_ptr<D3DARS::D3DACamera> Camera;
 	
 	shared_ptr<Scene> SelectedScene;
+
+	shared_ptr<GUIShaderEditor> ShaderEditor;
 	
 	Engine()
 	{
