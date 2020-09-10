@@ -9,21 +9,21 @@ bool Engine::OnInit()
 	ImGui::CreateContext();
 	auto IO = ImGui::GetIO();
 	ImGui_ImplWin32_Init(BIAppWindowHandle);
-	static auto GUIContext = D3DHWDevice::GetDeferredContexts()[D3DHWDevice::GetCurrentContext()];
-	auto ImGuiResult = ImGui_ImplDX11_Init(Device.Get(), GUIContext);
+
+	ImGui_ImplDX11_Init(Device.Get(), Context.Get());
 	ImGui::StyleColorsDark();
 
 	FBXLoader Loader;
 	Camera = make_shared<D3DACamera>(D3DACamera());
 	shared_ptr<D3DAModel> SampleModel = Loader.Load("Resources/Stylized_box.FBX");
 	shared_ptr<D3DAMaterial> Material = make_shared<D3DAMaterial>();
-	CompilePass("SampleVS.hlsl", "Sample", PASSTYPE::VER | PASSTYPE::PIX, Material);
+	CompilePass("Sample.hlsl", "Sample", PASSTYPE::VER | PASSTYPE::PIX, Material);
 
 	Renderer->GetSwapChainBuffer(0, SwapChainTexture);
 	Renderer->AddRenderViewport(1.0f, 1.0f, BIWidth, BIHeight, 1.0f);
 
-	
-	
+
+
 	static ComPtr<ID3D11RenderTargetView> SwapChainRTV = *SwapChainTexture->GetResource();
 	static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture;
 	Renderer->GetSwapChainDepthBuffer(DepthStencilTexture);
@@ -31,65 +31,57 @@ bool Engine::OnInit()
 	Renderer->SetSwapChainTexture(SwapChainTexture);
 	Renderer->SetSwapChainDepthStencil(DepthStencilTexture);
 	Renderer->CreateRasterizerState(D3D11_CULL_NONE, D3D11_FILL_SOLID, false);
-	
+
 	// ���� �ڵ� //
 	Context->RSSetViewports(0, &Renderer->GetViewport(0));
 	Context->OMSetRenderTargets(1, SwapChainRTV.GetAddressOf(), *DepthStencilTexture->GetResource());
-	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// ******** //
 
-	
+
 
 	SelectedScene = make_shared<Scene>();
 
 	SelectedScene->AddMaterial(Material);
 	SelectedScene->AddCamera(Camera);
 
-	
+
 	auto Inst = SelectedScene->MakeInstance("Sample Instance");
 	Inst->SetMesh(SampleModel);
 	Inst->AddMaterial(Material);
 
 	ShaderEditor = make_shared<GUIShaderEditor>();
-	ShaderEditor->Open("SampleVS.hlsl");
-	
+	ShaderEditor->Open("SampleVS.hlsl", Material);
 
-	Inst->GetTransform()->Rotate(-90, 0, 0);
-	Inst->GetTransform()->Translate(0, -25.0f, 0);
+
 	return true;
 }
 
 void Engine::OnUpdate(float Delta)
-{	
+{
 	{
-		
+
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 
-		
+
 		ImGui::NewFrame();
 		ImGui::Begin("Test");
 		ImGui::Text("Sample");
 		ImGui::End();
 
 		ShaderEditor->Editor();
-		
+
 		ImGui::EndFrame();
 
-		
-		
+
+
 		{
-			
 			ImGui::Render();
 
-			auto DrawData = ImGui::GetDrawData();
-			ImGui_ImplDX11_RenderDrawData(DrawData);
-			//static auto GUIContext = D3DHWDevice::GetDeferredContexts()[0];
-			//Renderer->FlushCommand(GUIContext);
 		}
-		
+
 	}
-	
+
 	static ComPtr<ID3D11RenderTargetView> SwapChainRTV = *SwapChainTexture->GetResource();
 	static shared_ptr<D3DRS::D3DDepthStencilTexture> DepthStencilTexture = Renderer->GetSwapChainDepthStencil();
 
@@ -97,7 +89,7 @@ void Engine::OnUpdate(float Delta)
 
 	XMStoreFloat4x4(&ViewProject.View, Camera->GetView());
 	XMStoreFloat4x4(&ViewProject.Projection, Camera->GetProjection());
-	
+
 	Context->UpdateSubresource(Camera->GetBuffer().Get(), 0, nullptr, &ViewProject, 0, 0);
 
 	Renderer->ClearTexture2D(SwapChainTexture, Colors::Red);
@@ -109,9 +101,8 @@ void Engine::OnUpdate(float Delta)
 	Inst->SetRasterizerState(Renderer.get(), 0);
 
 	Inst->GetTransform()->Rotate(90, 0, 0);
-	
+
 	Inst->DrawMesh(Renderer.get());
-	
 }
 
 void Engine::OnRender(float Delta)
