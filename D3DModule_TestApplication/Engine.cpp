@@ -50,7 +50,7 @@ bool Engine::OnInit()
 	Inst->AddMaterial(Material);
 
 	ShaderEditor = make_shared<GUIShaderEditor>();
-	ShaderEditor->Open("SampleVS.hlsl", Material);
+	ShaderEditor->Open("Sample.hlsl", Material);
 
 
 	return true;
