@@ -92,7 +92,7 @@ void Engine::OnUpdate(float Delta)
 
 	Context->UpdateSubresource(Camera->GetBuffer().Get(), 0, nullptr, &ViewProject, 0, 0);
 
-	Renderer->ClearTexture2D(SwapChainTexture, Colors::Red);
+	Renderer->ClearTexture2D(SwapChainTexture, Colors::Black);
 	Renderer->ClearDepthStencil(DepthStencilTexture);
 
 	static auto Inst = SelectedScene->GetInstance(0);
